@@ -73,7 +73,7 @@ The `RAMLError` class exposes the following properties:
   <tr>
     <th><code>.path</code></th>
     <td><code>Array</code></td>
-    <td>Returns the path in the object where the error is located. For example <code>['arrayProperty', 3, 'childProperty']</code></td>
+    <td>Returns the path in the object where the error is located. <br />For example <code>['arrayProperty', 3, 'childProperty']</code></td>
   </tr>
   <tr>
     <th><code>.message</code></th>
