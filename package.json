@@ -2,10 +2,10 @@
   "name": "raml-transpiler",
   "version": "0.1.0",
   "description": "Converts RAML document to javascript validation functions",
-  "main": "index.js",
+  "main": "main/raml-validator-loader.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
-    "start": "./node_modules/.bin/webpack && node dist/bundle.js"
+    "build": "./node_modules/.bin/webpack"
   },
   "author": "",
   "license": "MIT",
