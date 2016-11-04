@@ -53,7 +53,7 @@ module.exports = {
           '\t},', '' ]
       );
     }
-    validatorFragments.push('}');
+    validatorFragments.push('};');
 
     // THEN build the constants table fragments
     let globalTableFragments = Object.keys(ctx.constantTables)

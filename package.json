@@ -1,8 +1,8 @@
 {
-  "name": "raml-transpiler",
+  "name": "raml-validator-loader",
   "version": "0.1.0",
   "description": "Converts RAML document to javascript validation functions",
-  "main": "main/raml-validator-loader.js",
+  "main": "lib/raml-validator-loader.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/webpack"
