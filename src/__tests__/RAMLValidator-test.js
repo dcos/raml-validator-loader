@@ -467,6 +467,55 @@ describe('RAMLValidator', function () {
 
     });
 
+    describe('Anonymous Arrays', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  UnitType:',
+          '    type: number',
+          '  UnitArrayType:',
+          '    type: array',
+          '    items: UnitType',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      array1?: UnitType[]',
+          '      array2?: UnitArrayType',
+        ].join('\n'));
+      });
+
+      it('should validate anonymous array types', function () {
+        var errors = this.validator({
+          array1: [1,2,3,4]
+        });
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate referred array types', function () {
+        var errors = this.validator({
+          array2: [1,2,3,4]
+        });
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error on wrong anonymous array types', function () {
+        var errors = this.validator({
+          array1: 'foo'
+        });
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error on wrong referred array types', function () {
+        var errors = this.validator({
+          array2: 'bar'
+        });
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
   });
 
   describe('Union Type', function () {
