@@ -69,14 +69,20 @@ const FACET_FRAGMENT_GENERATORS = {
         break;
 
       case 'float':
+        //
         // To test for Float32 we are first casting the number to an internally
-        // representable Float32 number and we are then checking if it's equal
-        // to the number specified.
-        condition = `${IS_FLOAT} && ((${FLOAT_HELPER}[0] = value) == ${FLOAT_HELPER}[0])`;
+        // representable Float32 number and we are then calculating the difference
+        // to the original value.
+        //
+        // We are then checking if this difference is smaller than the number of
+        // decimals in the number
+        //
+        condition = `Math.abs((${FLOAT_HELPER}[0] = value) - ${FLOAT_HELPER}[0])`
+          + ` < Math.pow(10, -(value+'.').split('.')[1].length-1)`;
         break;
 
       case 'double':
-        condition = `${IS_FLOAT}`;
+        return [];
         break;
 
       default:
