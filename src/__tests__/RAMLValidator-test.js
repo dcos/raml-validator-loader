@@ -219,6 +219,282 @@ describe('RAMLValidator', function () {
 
   });
 
+  describe('Integer Type', function () {
+
+    describe('#minimum', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: integer',
+          '    minimum: 0'
+        ].join('\n'));
+      });
+
+      it('should validate if number bigger than minimum', function () {
+        var errors = this.validator(1);
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if number equal to minimum', function () {
+        var errors = this.validator(0);
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if number smaller than minimum', function () {
+        var errors = this.validator(-1);
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#maximum', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: integer',
+          '    maximum: 100'
+        ].join('\n'));
+      });
+
+      it('should validate if number smaller than maximum', function () {
+        var errors = this.validator(90);
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if number equal to maximum', function () {
+        var errors = this.validator(100);
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if number bigger than maximum', function () {
+        var errors = this.validator(101);
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#format', function () {
+
+      describe('int8', function () {
+
+        beforeEach(function() {
+          this.validator = createValidator([
+            '#%RAML 1.0',
+            'types:',
+            '  TestType:',
+            '    type: integer',
+            '    format: int8'
+          ].join('\n'));
+        });
+
+        it('should validate if number within int8 bounds', function () {
+          var errors = this.validator(-100);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(100);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should validate if number on the int8 bounds', function () {
+          var errors = this.validator(-128);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(127);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should return error if number outside the int8 bounds', function () {
+          var errors = this.validator(-500);
+          expect(errors.length).toEqual(1);
+
+          errors = this.validator(500);
+          expect(errors.length).toEqual(1);
+        });
+
+      });
+
+      describe('int16', function () {
+
+        beforeEach(function() {
+          this.validator = createValidator([
+            '#%RAML 1.0',
+            'types:',
+            '  TestType:',
+            '    type: integer',
+            '    format: int16'
+          ].join('\n'));
+        });
+
+        it('should validate if number within int16 bounds', function () {
+          var errors = this.validator(-30000);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(30000);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should validate if number on the int16 bounds', function () {
+          var errors = this.validator(-32768);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(32767);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should return error if number outside the int16 bounds', function () {
+          var errors = this.validator(-40000);
+          expect(errors.length).toEqual(1);
+
+          errors = this.validator(40000);
+          expect(errors.length).toEqual(1);
+        });
+
+      });
+
+      describe('int32', function () {
+
+        beforeEach(function() {
+          this.validator = createValidator([
+            '#%RAML 1.0',
+            'types:',
+            '  TestType:',
+            '    type: integer',
+            '    format: int32'
+          ].join('\n'));
+        });
+
+        it('should validate if number within int32 bounds', function () {
+          var errors = this.validator(-2000000000);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(2000000000);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should validate if number on the int32 bounds', function () {
+          var errors = this.validator(-2147483648);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(2147483647);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should return error if number outside the int32 bounds', function () {
+          var errors = this.validator(-3000000000);
+          expect(errors.length).toEqual(1);
+
+          errors = this.validator(3000000000);
+          expect(errors.length).toEqual(1);
+        });
+
+      });
+
+      describe('float', function () {
+
+        beforeEach(function() {
+          this.validator = createValidator([
+            '#%RAML 1.0',
+            'types:',
+            '  TestType:',
+            '    type: number',
+            '    format: float'
+          ].join('\n'));
+        });
+
+        it('should validate if cast difference smaller than decimals', function () {
+          var errors = this.validator(12.3124);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should validate if fits nicely on float32', function () {
+          var errors = this.validator(3.122999906539917);
+          expect(errors.length).toEqual(0);
+
+          errors = this.validator(481.59124755859375);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should return error if difference bigger than decimals', function () {
+          var errors = this.validator(4.1234567);
+          expect(errors.length).toEqual(1);
+        });
+
+      });
+
+    });
+
+    describe('#minimum [Inline]', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      value:',
+          '        type: number',
+          '        minimum: 10'
+        ].join('\n'));
+      });
+
+      it('should validate if number bigger than minimum', function () {
+        var errors = this.validator({value: 20});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if number equal to minimum', function () {
+        var errors = this.validator({value: 10});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if number smaller than minimum', function () {
+        var errors = this.validator({value: 5});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#maximum [Inline]', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      value:',
+          '        type: number',
+          '        maximum: 100'
+        ].join('\n'));
+      });
+
+      it('should validate if number smaller than maximum', function () {
+        var errors = this.validator({value: 90});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if number equal to maximum', function () {
+        var errors = this.validator({value: 100});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if number bigger than maximum', function () {
+        var errors = this.validator({value: 101});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+  });
+
   describe('Object Type', function () {
 
     describe('#properties', function () {
@@ -578,6 +854,146 @@ describe('RAMLValidator', function () {
           z: 2
         })
         expect(errors.length).toEqual(2);
+      });
+
+    });
+
+  });
+
+  describe('Inline Type Definitions', function () {
+
+    describe('#number[]', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      value: number[]',
+        ].join('\n'));
+      });
+
+      it('should validate numeric array types', function () {
+        var errors = this.validator({value: [1,2,3]})
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error on non-array types', function () {
+        var errors = this.validator({value: {}})
+        expect(errors.length).toEqual(1);
+        var errors = this.validator({value: 1})
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error on incorrect child types', function () {
+        var errors = this.validator({value: [true, false, {}]})
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#type:array,items:number', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      value: ',
+          '        type: array',
+          '        items: number'
+        ].join('\n'));
+      });
+
+      it('should validate numeric array types', function () {
+        var errors = this.validator({value: [1,2,3]});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error on non-array types', function () {
+        var errors = this.validator({value: {}});
+        expect(errors.length).toEqual(1);
+        var errors = this.validator({value: 1});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error on incorrect child types', function () {
+        var errors = this.validator({value: [true, false, {}]});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#NumericType[]', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  NumericType:',
+          '    type: number',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      value: NumericType[]'
+        ].join('\n'));
+      });
+
+      it('should validate numeric array types', function () {
+        var errors = this.validator({value: [1,2,3]});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error on non-array types', function () {
+        var errors = this.validator({value: {}});
+        expect(errors.length).toEqual(1);
+        var errors = this.validator({value: 1});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error on incorrect child types', function () {
+        var errors = this.validator({value: [true, false, {}]});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#type:array,items:NumericType', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  NumericType:',
+          '    type: number',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      value: ',
+          '        type: array',
+          '        items: NumericType'
+        ].join('\n'));
+      });
+
+      it('should validate numeric array types', function () {
+        var errors = this.validator({value: [1,2,3]});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error on non-array types', function () {
+        var errors = this.validator({value: {}});
+        expect(errors.length).toEqual(1);
+        var errors = this.validator({value: 1});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error on incorrect child types', function () {
+        var errors = this.validator({value: [true, false, {}]});
+        expect(errors.length).toEqual(1);
       });
 
     });
