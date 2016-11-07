@@ -17,7 +17,7 @@ function RAMLError(path, message, _messageVariables) {
   Object.defineProperty(this, 'message', {
     get: function() {
       return message.replace(REPLACE_MESSAGE_TEMPLATE, function(match) {
-        return messageVariables[match.slice(1,-1)] || '';
+        return ''+messageVariables[match.slice(1,-1)] || '';
       });
     },
   });
