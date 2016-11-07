@@ -1,7 +1,7 @@
 import RAMLUtil from './utils/RAMLUtil';
 import GeneratorUtil from './utils/GeneratorUtil';
 import TypeValidator from './generators/TypeValidator';
-import RAMLError from './payloads/RAMLError';
+import RAMLErrorPayload from './payloads/RAMLError';
 
 module.exports = {
 
@@ -36,11 +36,14 @@ module.exports = {
         continue;
       }
 
+      let comment = itype.examples()[0].expandAsString();
+      if (RAMLUtil.isInlineType(itype)) {
+        comment += '\n\n' + RAMLUtil.getInlineTypeComment(itype);
+      }
+
       validatorFragments = validatorFragments.concat(
         GeneratorUtil.indentFragments(
-          this.commentBlock(
-            itype.examples()[0].expandAsString()
-          )
+          this.commentBlock( comment )
         ),
         [ `\t${typeName}: function(value, _path) {`,
           '\t\tvar path = _path || [];',
@@ -54,6 +57,7 @@ module.exports = {
       );
     }
     validatorFragments.push('};');
+    validatorFragments.push('return Validators;');
 
     // THEN build the constants table fragments
     let globalTableFragments = Object.keys(ctx.constantTables)
@@ -82,12 +86,13 @@ module.exports = {
 
     // Compose result
     return [].concat(
-      [ RAMLError ],
+      'module.exports = (function() {',
+      [ RAMLErrorPayload ],
       globalTableFragments,
       '',
       validatorFragments,
       '',
-      'module.exports = Validators;'
+      '})();'
     ).join('\n');
   }
 
