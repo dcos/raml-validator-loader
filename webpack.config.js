@@ -21,6 +21,7 @@ module.exports = {
     ]
   },
   externals: [
+    'crypto',
     'fs',
     'path',
     'raml-1-parser',
