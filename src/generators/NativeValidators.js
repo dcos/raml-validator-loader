@@ -132,7 +132,7 @@ module.exports = {
    * type test.
    */
   wrapWithNativeTypeValidator(fragments, itype, context) {
-    let typeName = RAMLUtil.getTypeName(itype);
+    let typeName = RAMLUtil.getBuiltinTypeName(itype);
     if (NATIVE_TYPE_VALIDATORS[typeName] === undefined) {
       throw TypeError(`Unknown native type ${typeName}`);
     }
