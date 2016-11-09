@@ -5,6 +5,30 @@ import RAMLUtil from '../utils/RAMLUtil';
 const NATIVE_TYPE_VALIDATORS = {
 
   /**
+   * Any
+   */
+  any: function(fragments, context) {
+    // Everything passes
+    return [];
+  },
+
+  /**
+   * Nil
+   */
+  nil: function(fragments, context) {
+    let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
+      'TYPE_NOT_NULL', 'Expecting null');
+
+    return [].concat(
+      `if (value !== null) {`,
+        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+      `} else {`,
+        indentFragments( fragments ),
+      `}`
+    );
+  },
+
+  /**
    * Number type
    */
   NumberType: function(fragments, context) {
@@ -76,7 +100,7 @@ const NATIVE_TYPE_VALIDATORS = {
       'TYPE_NOT_DATETIME', 'Expecting a date/time string');
 
     return [].concat(
-      `if (typeof value != "string") {`,
+      `if (isNaN(new Date(value).getTime())) {`,
         `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
       `} else {`,
         indentFragments( fragments ),
