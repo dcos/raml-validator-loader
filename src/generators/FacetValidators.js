@@ -8,7 +8,7 @@ const FACET_FRAGMENT_GENERATORS = {
    */
   maximum: function(value, context) {
     let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'NUMBER_MAX', 'Must be smaller than {value}');
+      'NUMBER_MAX', 'Must be smaller than or equal to {value}');
 
     return FragmentFactory.testAndPushError(
       `value > ${value}`,
@@ -22,7 +22,7 @@ const FACET_FRAGMENT_GENERATORS = {
    */
   minimum: function(value, context) {
     let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'NUMBER_MIN', 'Must be bigger than {value}');
+      'NUMBER_MIN', 'Must be bigger than or equal to {value}');
 
     return FragmentFactory.testAndPushError(
       `value < ${value}`,
