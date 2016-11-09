@@ -69,20 +69,29 @@ const HighOrderComposers = {
     // each property individually
     if (regexMatchers.length !== 0) {
 
-      // Get an array of property names handed outside the regex world
-      let outliers = stringMatchers.map(function(match) {
-        return match[0];
-      });
-
       // Define properties only when needed
       hasPropsDefined = true;
       fragments.push(
         `var matched = [];`,
-        `var props = Object.keys(value);`,
-        `var regexProps = props.filter(function(key) {`,
-        `\treturn ${JSON.stringify(outliers)}.indexOf(key) === -1;`,
-        `});`
+        `var props = Object.keys(value);`
       );
+
+      // If we are mixing regex properties and regular ones, exclude regular
+      // properties from being processed as regex
+      let outliers = stringMatchers.map(function(match) {
+        return match[0];
+      });
+      if (outliers.length) {
+        fragments.push(
+          `var regexProps = props.filter(function(key) {`,
+          `\treturn ${JSON.stringify(outliers)}.indexOf(key) === -1;`,
+          `});`
+        );
+      } else {
+        fragments.push(
+          `var regexProps = props;`
+        );
+      }
 
       fragments = regexMatchers.reduce(function(fragments, [regex, required, validatorFn]) {
         let REGEX = context.getConstantExpression('REGEX', `/${regex}/`);
