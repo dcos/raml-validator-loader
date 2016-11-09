@@ -1,8 +1,6 @@
 import FacetValidators from './FacetValidators';
 import { indentFragments } from '../utils/GeneratorUtil';
 
-const REGEX_MATCHING_REGEX = /[\[\]\(\)\{\}\\\^\$\.\|\?\*\+/]/g;
-
 const HighOrderComposers = {
 
   /**
@@ -36,6 +34,7 @@ const HighOrderComposers = {
    * Compose object properties fragments
    */
   composeObjectProperties(properties, facets, context) {
+    const REGEX_MATCHING_REGEX = /[\[\]\(\)\{\}\\\^\$\.\|\?\*\+/]/g;
     let hasPropsDefined = false;
     let stringMatchers = [];
     let regexMatchers = [];
@@ -70,11 +69,19 @@ const HighOrderComposers = {
     // each property individually
     if (regexMatchers.length !== 0) {
 
+      // Get an array of property names handed outside the regex world
+      let outliers = stringMatchers.map(function(match) {
+        return match[0];
+      });
+
       // Define properties only when needed
       hasPropsDefined = true;
       fragments.push(
         `var matched = [];`,
-        `var props = Object.keys(value);`
+        `var props = Object.keys(value);`,
+        `var regexProps = props.filter(function(key) {`,
+        `\treturn ${JSON.stringify(outliers)}.indexOf(key) === -1;`,
+        `});`
       );
 
       fragments = regexMatchers.reduce(function(fragments, [regex, required, validatorFn]) {
@@ -83,7 +90,7 @@ const HighOrderComposers = {
           'PROP_MISSING_MATCH', 'Missing a property that matches `{name}`');
 
         fragments.push(
-          `matched = props.filter(function(key) {`,
+          `matched = regexProps.filter(function(key) {`,
           `\treturn ${REGEX}.exec(key);`,
           `});`
         );
