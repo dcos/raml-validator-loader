@@ -19,9 +19,7 @@ function createValidator(ramlDocument, typeName='TestType') {
 
   // Generate code
   var code = Generator.generate(ctx);
-  var typeValidators = eval(`(function() {var module={};${code};return module.exports;})()`);
-
-  // console.log(code);
+  var typeValidators = eval(code.replace('module.exports = ', ''));
 
   // Return the validator for this type
   return typeValidators[typeName];
@@ -30,6 +28,77 @@ function createValidator(ramlDocument, typeName='TestType') {
 describe('RAMLValidator', function () {
 
   describe('Scalar Types', function () {
+
+    describe('#nil', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: nil'
+        ].join('\n'));
+      });
+
+      it('should validate if null', function () {
+        var errors = this.validator(null)
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if string', function () {
+        var errors = this.validator('test')
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if number', function () {
+        var errors = this.validator(123)
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if object', function () {
+        var errors = this.validator({})
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if array', function () {
+        var errors = this.validator([])
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#any', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: any'
+        ].join('\n'));
+      });
+
+      it('should validate if string', function () {
+        var errors = this.validator('test')
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if number', function () {
+        var errors = this.validator(123)
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if object', function () {
+        var errors = this.validator({})
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if array', function () {
+        var errors = this.validator([])
+        expect(errors.length).toEqual(0);
+      });
+
+    });
 
     describe('#string', function () {
 
@@ -279,6 +348,30 @@ describe('RAMLValidator', function () {
 
     });
 
+    describe('#multipleOf', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: integer',
+          '    multipleOf: 10'
+        ].join('\n'));
+      });
+
+      it('should validate if number is multiple of base', function () {
+        var errors = this.validator(90);
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if number not multiple of base', function () {
+        var errors = this.validator(95);
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
     describe('#format', function () {
 
       describe('int8', function () {
@@ -427,6 +520,51 @@ describe('RAMLValidator', function () {
 
       });
 
+      describe('double', function () {
+
+        beforeEach(function() {
+          this.validator = createValidator([
+            '#%RAML 1.0',
+            'types:',
+            '  TestType:',
+            '    type: number',
+            '    format: double'
+          ].join('\n'));
+        });
+
+        it('should validate 32-bit integers', function () {
+          var errors = this.validator(2214658048);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should validate 64-bit integers', function () {
+          var errors = this.validator(5765174873248825344);
+          expect(errors.length).toEqual(0);
+        });
+
+        it('should validate big float-point numbers', function () {
+          var errors = this.validator(Math.PI);
+          expect(errors.length).toEqual(0);
+        });
+
+      });
+
+      describe('unknown', function () {
+
+        it('should throw on exception on invalid format values', function () {
+          expect(function() {
+            createValidator([
+              '#%RAML 1.0',
+              'types:',
+              '  TestType:',
+              '    type: number',
+              '    format: unknown'
+            ].join('\n'));
+          }).toThrow();
+        });
+
+      });
+
     });
 
     describe('#minimum [Inline]', function () {
@@ -491,6 +629,121 @@ describe('RAMLValidator', function () {
         expect(errors.length).toEqual(1);
       });
 
+    });
+
+  });
+
+  describe('String Type', function () {
+
+    describe('#minLength', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: string',
+          '    minLength: 3'
+        ].join('\n'));
+      });
+
+      it('should validate if string longer than minimum', function () {
+        var errors = this.validator('123456');
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if string length equal to minimum', function () {
+        var errors = this.validator('123');
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if string length smaller than minimum', function () {
+        var errors = this.validator('12');
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#maxLength', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: string',
+          '    maxLength: 10'
+        ].join('\n'));
+      });
+
+      it('should validate if string shorter than maximum', function () {
+        var errors = this.validator('1234567');
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if string length equal to maximum', function () {
+        var errors = this.validator('1234567890');
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if string length smaller than maximum', function () {
+        var errors = this.validator('12345678901234');
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('#pattern', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: string',
+          '    pattern: ^a[bc]d$'
+        ].join('\n'));
+      });
+
+      it('should validate if string matches pattern', function () {
+        var errors = this.validator('abd');
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if string does not match patern', function () {
+        var errors = this.validator('bdc');
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+  });
+
+  describe('Enum Type', function () {
+
+    beforeEach(function() {
+      this.validator = createValidator([
+        '#%RAML 1.0',
+        'types:',
+        '  TestType:',
+        '    type: string',
+        '    enum: [ a, b, c ]'
+      ].join('\n'));
+    });
+
+    it('should validate if one of the enum option is given', function () {
+      var errors = this.validator('a');
+      expect(errors.length).toEqual(0);
+
+      errors = this.validator('b');
+      expect(errors.length).toEqual(0);
+
+      errors = this.validator('c');
+      expect(errors.length).toEqual(0);
+    });
+
+    it('should return error if non-enum option given', function () {
+      var errors = this.validator('x');
+      expect(errors.length).toEqual(1);
     });
 
   });
@@ -626,6 +879,47 @@ describe('RAMLValidator', function () {
 
     });
 
+    describe('#additionalProperties', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    additionalProperties: false',
+          '    properties:',
+          '      required: number',
+          '      optional?: number',
+        ].join('\n'));
+      });
+
+      it('should validate if all properties defined', function () {
+        var errors = this.validator({
+          required: 1,
+          optional: 2
+        })
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if less properties defined', function () {
+        var errors = this.validator({
+          required: 1
+        })
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if unknown properties defined', function () {
+        var errors = this.validator({
+          required: 1,
+          optional: 2,
+          extra: 3
+        })
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
   });
 
   describe('Array Type', function () {
@@ -739,6 +1033,87 @@ describe('RAMLValidator', function () {
       it('should return error if more than maxItems', function () {
         var errors = this.validator([1,2,3,4,5,6]);
         expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('Multidimentional Arrays', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: number[][]'
+        ].join('\n'));
+      });
+
+      it('should validate if array of arrays have correct type', function () {
+        var errors = this.validator([[1,2,3], [4,5,6]])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if array of arrays with no values', function () {
+        var errors = this.validator([[], [], []])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if empty array', function () {
+        var errors = this.validator([])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if array of empty array', function () {
+        var errors = this.validator([[]])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if array of arrays with wrong type', function () {
+        var errors = this.validator([['a', 'b']])
+        expect(errors.length).toEqual(2);
+      });
+
+      it('should return error if array of objects', function () {
+        var errors = this.validator([{}])
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if array of types', function () {
+        var errors = this.validator([1,2,3])
+        expect(errors.length).toEqual(3);
+      });
+
+    });
+
+    describe('Arrays of any[]', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: any[]'
+        ].join('\n'));
+      });
+
+      it('should validate if string', function () {
+        var errors = this.validator(['test'])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if number', function () {
+        var errors = this.validator([123])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if object', function () {
+        var errors = this.validator([{}])
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if array', function () {
+        var errors = this.validator([[]])
+        expect(errors.length).toEqual(0);
       });
 
     });
@@ -993,6 +1368,147 @@ describe('RAMLValidator', function () {
 
       it('should return error on incorrect child types', function () {
         var errors = this.validator({value: [true, false, {}]});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+  });
+
+  describe('Regex Keys', function () {
+
+    describe('Proper RegExp', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      /^[a-z0-9]+$/: string',
+        ].join('\n'));
+      });
+
+      it('should validate if object has only one key that matches the regex', function () {
+        var errors = this.validator({key: 'string'});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if object at least one key validates the regex', function () {
+        var errors = this.validator({wrong_key: 'value1', WRONG: 'value2', key: 'string'});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if key matches, but type is invalid', function () {
+        var errors = this.validator({key: 1234});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if all properties missing', function () {
+        var errors = this.validator({});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('Multiple RegExp', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      /^[ab]+$/: string',
+          '      /^[cd]+$/: number',
+        ].join('\n'));
+      });
+
+      it('should validate if object contains both types', function () {
+        var errors = this.validator({aba: 'string', cccd: 123});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if object contains only first of type', function () {
+        var errors = this.validator({aba: 'string'});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if object contains only second of type', function () {
+        var errors = this.validator({cccd: 123});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if all properties missing', function () {
+        var errors = this.validator({})
+        expect(errors.length).toEqual(2);
+      });
+
+    });
+
+    describe('Assumed RegExp', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      a*: string',
+        ].join('\n'));
+      });
+
+      it('should validate if object has only one key that matches the regex', function () {
+        var errors = this.validator({test: 'string'});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if no key is matching', function () {
+        var errors = this.validator({oxo: 'string', xox: 'string'});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if all properties missing', function () {
+        var errors = this.validator({});
+        expect(errors.length).toEqual(1);
+      });
+
+    });
+
+    describe('Mixed RegExp and Props', function () {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      /^[ab]+$/: string',
+          '      baba?: number',
+        ].join('\n'));
+      });
+
+      it('should validate if object contains both optional and regex', function () {
+        var errors = this.validator({aba: 'string', baba: 123});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if object contains only regex', function () {
+        var errors = this.validator({aba: 'string'});
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if only optional provided', function () {
+        var errors = this.validator({baba: 123});
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if all properties missing', function () {
+        var errors = this.validator({})
         expect(errors.length).toEqual(1);
       });
 
