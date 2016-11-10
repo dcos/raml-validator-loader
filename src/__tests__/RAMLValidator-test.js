@@ -22,6 +22,7 @@ function createValidator(ramlDocument, typeName='TestType') {
   var typeValidators = eval(code.replace('module.exports = ', ''));
 
   // Return the validator for this type
+  typeValidators[typeName].code = code;
   return typeValidators[typeName];
 }
 
@@ -1540,12 +1541,12 @@ describe('RAMLValidator', function () {
           '  TestType:',
           '    type: object',
           '    properties:',
-          '      a*: string',
+          '      a+: string',
         ].join('\n'));
       });
 
       it('should validate if object has only one key that matches the regex', function () {
-        var errors = this.validator({test: 'string'});
+        var errors = this.validator({aaa: 'string'});
         expect(errors.length).toEqual(0);
       });
 
