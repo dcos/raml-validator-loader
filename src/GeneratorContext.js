@@ -19,15 +19,14 @@ class GeneratorContext {
    * @returns {String} - Returns the function javascript source
    */
   uses(itype) {
-    let name = RAMLUtil.getTypeName(itype);
-    let callExpr = `Validators.${name}`;
+    let ref = RAMLUtil.getTypeRef(itype);
 
-    if (!this.typesProcessed[name]) {
+    if (!this.typesProcessed[ref]) {
       this.typesQueue.push(itype);
-      this.typesProcessed[name] = true;
+      this.typesProcessed[ref] = true;
     }
 
-    return callExpr;
+    return ref;
   }
 
   /**

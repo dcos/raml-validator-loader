@@ -21,7 +21,7 @@ module.exports = {
    *
    * Since the latter is defining an 'anonymous' type in-place
    *
-   * @param {ITypeDefinition} itype - The runtime type of a RAML type to check
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition to check
    * @returns {Boolean} Returns true if this type is an in-line definition
    */
   isInlineType(itype) {
@@ -32,9 +32,29 @@ module.exports = {
   },
 
   /**
+   * This function checks if the given internal type is an inline array
+   * definition of a known type. Such definitions need a different name, yet
+   * they remain exposed on the `Validators` object.
+   *
+   * For example:
+   *
+   * properties:
+   *   arrayProp: SomeType[]
+   *
+   * Should generate a validator named `SomeTypeAsArray` instead of an anomyous
+   * validator like inline.
+   *
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition to check
+   * @returns {Boolean} Returns true if this type is an in-line array
+   */
+  isArrayOfType(itype) {
+    return (itype.nameId() === '') && itype.isArray();
+  },
+
+  /**
    * Return a comment that describes this inline type
    *
-   * @param {ITypeDefinition} itype - The runtime type of a RAML type
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition
    * @returns {String} The comment to the specialised inline type
    */
   getInlineTypeComment(itype) {
@@ -51,27 +71,9 @@ module.exports = {
   },
 
   /**
-   * Walk up the type and find out the built-in type
-   *
-   * @param {ITypeDefinition} itype - The runtime type of a RAML type
-   * @returns {ITypeDefinition|null} The builtin type or null if not found
-   */
-  getBuiltinTypeName(itype) {
-    if (itype.isBuiltIn()) {
-      return itype.nameId();
-    }
-
-    return itype.allSuperTypes().find(function(type) {
-      return type.isBuiltIn().nameId();
-    });
-
-    return null;
-  },
-
-  /**
    * Returns the base type of the given in-line type definition
    *
-   * @param {ITypeDefinition} itype - The runtime type of a RAML type
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition
    * @returns {String} The string name of the base type
    */
   getInlineTypeBase(itype) {
@@ -93,7 +95,7 @@ module.exports = {
    * Returns a unique name for this inline type, by calculating a checksum
    * of the values of it's facets.
    *
-   * @param {ITypeDefinition} itype - The runtime type of a RAML type
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition
    * @returns {String} A unique name for this type, based on it's facets values
    */
   getInlineTypeName(itype) {
@@ -111,57 +113,87 @@ module.exports = {
   },
 
   /**
-   * This function tries to put a name on the given run-time RAML type.
+   * The name of the in-line array type.
    *
-   * @param {ITypeDefinition} itype - The runtime type of a RAML type
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition
+   * @returns {String} Returns a string with the name of the given type
+   */
+  getArrayOfTypeName(itype) {
+    return this.getTypeName(itype.componentType()) + 'AsArray';
+  },
+
+  /**
+   * This function tries to put a name on the given run-time RAML definition.
+   *
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition
    * @returns {String} Returns a string with the name of the given type
    */
   getTypeName(itype) {
 
-    // Inline types are processed first
+    //
+    // Inline types are processed first. These are:
+    //
+    //   TypeA:
+    //     properties:
+    //       # An anonymous array type
+    //       case1:
+    //         type: array
+    //         items: string
+    //       # An anonymous primitive type
+    //       case2:
+    //         type: number
+    //         minValue: 0
+    //
     if (this.isInlineType(itype)) {
       return this.getInlineTypeName(itype);
     }
 
-    // The moment we have found a named type we are good
-    if (itype.nameId() != null) {
-
-      // There are cases with anonymous arrays
-      if (!itype.nameId() && itype.isArray()) {
-        return this.getTypeName(itype.componentType()) + 'AsArray';
-      }
-
-      return itype.nameId();
-    }
-
-    // If this is a value type, walk the tree upwards
-    if (itype.isValueType()) {
-      return this.getTypeName(itype.superTypes()[0])
-    }
-
-    // A special case, where we have a structured item, but without an id
-    // or properties, that's an empty field definition. For example:
     //
-    // labels?:
-    //   type: labels.KVLabels
-    //   description: some text
+    // Check if this is an array of a known type. This is:
     //
-    if (itype.hasStructure() && itype.superTypes().length) {
-      return this.getTypeName(itype.superTypes()[0]);
+    //   TypeA:
+    //     properties:
+    //       # In-line array definition of known type
+    //       case1: string[]
+    //
+    if (this.isArrayOfType(itype)) {
+      return this.getArrayOfTypeName(itype);
     }
 
-    // This looks like an anonymous inline array type
-    if (itype.isArray()) {
-      return this.getTypeName(itype.componentType()) + 'AsArray';
-    }
+    // Return type name
+    return itype.nameId();
+  },
 
-    // That looks like an unnamed type :/
-    throw new Error('Don\'t know how to handle anonymous, structured types');
+  /**
+   * Get the group where this type should be registered
+   *
+   * This is either `Validators`, exposed to the user, or `PrivateValidators`,
+   * internally maintained.
+   *
+   * @param {ITypeDefinition} itype - The runtime type of the RAML definition
+   * @returns {string} Returns the name of the group where this type should be added
+   */
+  getTypeGroup(itype) {
+    if (this.isInlineType(itype)) {
+      return 'PrivateValidators';
+    } else {
+      return 'Validators';
+    }
+  },
+
+  /**
+   * Return the reference to the given type
+   */
+  getTypeRef(itype) {
+    return this.getTypeGroup(itype) + '.' + this.getTypeName(itype);
   },
 
   /**
    * This function walks up the type tree until it reaches a native type
    * and then returns it's type.
+   *
+   * @param {ITypeDefinition} itype - The runtime type of the RAML definition
+   * @returns {ITypeDefinition|null} The builtin type or null if not found
    */
   getBuiltinType(itype) {
     if (itype.isBuiltIn()) {
@@ -171,6 +203,21 @@ module.exports = {
     return itype.allSuperTypes().find(function(type) {
       return type.isBuiltIn();
     });
+  },
+
+  /**
+   * Return the name of a builtin type
+   *
+   * @param {ITypeDefinition} itype - The runtime type of a RAML definition
+   * @returns {string|null} The builtin type name or null if not found
+   */
+  getBuiltinTypeName(itype) {
+    let builtinType = this.getBuiltinType(itype);
+    if (builtinType == null) {
+      return null;
+    }
+
+    return builtinType.nameId();
   }
 
 };
