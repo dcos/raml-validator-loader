@@ -40,7 +40,7 @@ module.exports = {
     if (itype.isObject()) {
       fragments = fragments.concat(
           HighOrderComposers.composeObjectProperties(
-              itype.allProperties(), itype.facets(), context
+              itype.allProperties(), itype, context
             )
         );
     }

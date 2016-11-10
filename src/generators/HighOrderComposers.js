@@ -1,6 +1,43 @@
 import FacetValidators from './FacetValidators';
 import { indentFragments } from '../utils/GeneratorUtil';
 
+/**
+ * This is a hackish way to read the contents of the `additionalProperties`
+ * facet value. That's because the ITypeDefinition API is not populating that
+ * facet in the `getFixedFacets()` function.
+ *
+ * So, we are looking up the type adapter (that RAML uses for type validation
+ * internally), and we are looking up on it's metadata for the
+ * `KnownPropertyRestriction`. The value of this restriction is the value of
+ * the `additionalProperties` facet.
+ *
+ * @param {ITypeDefinition} itype - The type to extract the value from
+ * @param {boolean} defaultValue - The default value if the facet is not found
+ * @returns {boolean} Returns the value of the additionalProperties facet
+ */
+function getAdditionalPropertiesValue(itype, defaultValue=true) {
+
+  // Locate the type adapter
+  let typeAdapter = itype.getAdapters().find(function(adapter) {
+    return adapter.constructor.name === 'InheritedType';
+  });
+  if (!typeAdapter) {
+    return defaultValue;
+  }
+
+  // The metadata KnownPropertyRestriction is defined when the
+  // additionalProperties facet is defiend and it's value contains
+  // the facet's value
+  let knownProperty = typeAdapter.meta().find(function(meta) {
+    return meta.constructor.name === 'KnownPropertyRestriction';
+  });
+  if (!knownProperty) {
+    return defaultValue;
+  }
+
+  return knownProperty.value();
+}
+
 const HighOrderComposers = {
 
   /**
@@ -33,7 +70,7 @@ const HighOrderComposers = {
   /**
    * Compose object properties fragments
    */
-  composeObjectProperties(properties, facets, context) {
+  composeObjectProperties(properties, itype, context) {
     const REGEX_MATCHING_REGEX = /[\[\]\(\)\{\}\\\^\$\.\|\?\*\+/]/g;
     let hasPropsDefined = false;
     let stringMatchers = [];
@@ -145,9 +182,9 @@ const HighOrderComposers = {
 
     // The `additionalProperties` facet is a bit more complicated, since it
     // requires traversal thorugh it's keys
-    if (facets.additionalProperties) {
-        let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-          'PROP_ADDITIONAL_PROPS', 'Unexpected extraneous property `{name}`');
+    if (getAdditionalPropertiesValue(itype) === false) {
+      let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
+        'PROP_ADDITIONAL_PROPS', 'Unexpected extraneous property `{name}`');
 
       // Don't re-define props if we already have them
       if (!hasPropsDefined) {
@@ -159,21 +196,18 @@ const HighOrderComposers = {
       // Iterate over properties and check if the validators match
       fragments = fragments.concat(
         `props.forEach(function(key) {`,
-        `\tvar found = false;`,
         stringMatchers.reduce(function(fragments, [name, unused1, unused2]) {
           return fragments.concat([
-            `if (key === "${name}") found=true;`
+            `\tif (key === "${name}") return;`
           ]);
         }, []),
         regexMatchers.reduce(function(fragments, [regex, unused1, unused2]) {
           let REGEX = context.getConstantExpression('REGEX', `/${regex}/`);
           return fragments.concat([
-            `if (${REGEX}.exec(key)) found=true;`
+            `if (${REGEX}.exec(key)) return;`
           ]);
         }, []),
-        `\tif (!found) {`,
-        `\t\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}, {name: key}));`,
-        `\t}`
+        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}, {name: key}));`,
         `});`
       );
     }
