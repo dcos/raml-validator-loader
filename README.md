@@ -81,3 +81,22 @@ The `RAMLError` class exposes the following properties:
     <td>Returns the human-readable error message.</td>
   </tr>
 </table>
+
+## Work in progress
+
+The following **facets** are not yet implemented:
+
+- `discriminator` in [Unions](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#using-discriminator)
+- `discriminatorValue` [Unions](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#using-discriminator)
+
+The following **types** are not yet implemented:
+
+- [`date-only`](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
+- [`time-only `](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
+- [`datetime-only `](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
+- [`datetime`](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
+- [`file`](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#file)
+
+The following **concepts** are not yet implemented:
+
+- [Multiple Inheritance](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#multiple-inheritance)
