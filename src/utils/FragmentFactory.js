@@ -20,33 +20,6 @@ module.exports = {
         `\terrors.push(new RAMLError(path, ${errorConstant}, ${variablesExpr}));`,
       '}'
     ];
-  },
-
-  /**
-   * Delegate the property validation to the given delegate function.
-   * Such functions can be any other validation function generated so far or
-   * will be generated in the future.
-   *
-   * @param {String} property - The property whose check you want to delegate
-   * @param {}
-   */
-  delegatePropertyValidation(property, delegateFn) {
-    return [
-      `errors = errors.concat(RAMLValidators.${delegateFn}(value.${property}, path.concat['${property}']));`
-    ];
-  },
-
-  /**
-   * Run the given expression only if the given property is not missing
-   */
-  runIfPropNotMissing(property, expression) {
-    let indentedExpression = '\t' + expression.replace(/\n/g, '\n\t');
-
-    return [
-      `if (value.${property} != null) {`,
-        indentedExpression,
-      `}`
-    ];
   }
 
 };
