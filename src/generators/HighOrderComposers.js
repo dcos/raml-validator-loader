@@ -43,19 +43,28 @@ const HighOrderComposers = {
   /**
    * Compose a union validator
    */
-  composeUnion(facets, leftValidatorFn, rightValidatorFn, context) {
-    let fragments = [
-      // First perform some type validations
-      `var lErr = ${leftValidatorFn}(value, path);`,
-      `var rErr = ${rightValidatorFn}(value, path);`,
-      `if (lErr.length === 0) { return []; }`,
-      `if (rErr.length === 0) { return []; }`,
-      `if (lErr.length < rErr.length) {`,
-      `\treturn lErr;`,
-      `} else {`,
-      `\treturn rErr;`,
-      `}`
-    ];
+  composeUnion(facets, unionValidatorFns, context) {
+    let fragments = [].concat(
+      `errors = errors.concat([`,
+
+      // Run the union validation type for every possible union type
+      unionValidatorFns.map(function(typeValidatorFn) {
+        return `\t${typeValidatorFn}(value, path),`
+      }),
+
+      // Sort the validator responses by the number of errors, ascending
+      `].sort(function(a, b) {`,
+      `\treturn a.length - b.length;`,
+
+      //
+      // Pick the validation with the fewest possible errors
+      //
+      // If == 0 : The union type validation succeeded
+      // If  > 0 : The union with the fewest errors, and therfore the most
+      //           probabel match.
+      //
+      `})[0]);`
+    );
 
     return fragments;
   },

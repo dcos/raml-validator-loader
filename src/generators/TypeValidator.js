@@ -4,6 +4,23 @@ import HighOrderComposers from './HighOrderComposers';
 import NativeValidators from './NativeValidators';
 import RAMLUtil from '../utils/RAMLUtil';
 
+/**
+ * Collect union types, from possibly nested unions
+ *
+ * @param {IUnionType} itype - The Union run-time RAML type to collect union types for
+ * @returns {Array} Returns an array of union types that compose this union
+ */
+function collectUnionTypes(itype) {
+  if (!itype.isUnion()) {
+    return [itype];
+  } else {
+    return [].concat(
+      collectUnionTypes(itype.leftType()),
+      collectUnionTypes(itype.rightType())
+    );
+  }
+}
+
 module.exports = {
 
   /**
@@ -21,11 +38,12 @@ module.exports = {
     // We first use the high-order composers to generate the base code
     // depending on the major classifications of the validators
     if (itype.isUnion()) {
-      let leftTypeValidatorFn = context.uses( itype.leftType() );
-      let rightTypeValidatorFn = context.uses( itype.rightType() );
+      let unionTypes = collectUnionTypes(itype);
+      let unionValidators = unionTypes.map(function(itype) {
+        return context.uses( itype );
+      });
       fragments = HighOrderComposers.composeUnion(
-          itype.getFixedFacets(), leftTypeValidatorFn,
-          rightTypeValidatorFn, context
+          itype.getFixedFacets(), unionValidators, context
         );
 
     } else {
