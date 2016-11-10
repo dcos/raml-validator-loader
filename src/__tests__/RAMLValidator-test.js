@@ -1171,7 +1171,7 @@ describe('RAMLValidator', function () {
 
   describe('Union Type', function () {
 
-    describe('#properties', function () {
+    describe('2 Unions', function () {
 
       beforeEach(function() {
         this.validator = createValidator([
@@ -1232,6 +1232,89 @@ describe('RAMLValidator', function () {
       });
 
     });
+
+    describe('3 Unions', function() {
+
+      beforeEach(function() {
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TypeA:',
+          '    type: object',
+          '    properties:',
+          '      a: number',
+          '      x: string',
+          '  TypeB:',
+          '    type: object',
+          '    properties:',
+          '      b: number',
+          '      x: boolean',
+          '  TypeC:',
+          '    type: object',
+          '    properties:',
+          '      c: number',
+          '      x: object',
+          '  TestType:',
+          '    type: TypeA | TypeB | TypeC',
+        ].join('\n'));
+      });
+
+      it('should validate if props of typeA match', function () {
+        var errors = this.validator({
+          a: 1,
+          x: 'string'
+        })
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if props of typeB match', function () {
+        var errors = this.validator({
+          b: 2,
+          x: false,
+        })
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should validate if props of typeC match', function () {
+        var errors = this.validator({
+          c: 2,
+          x: {},
+        })
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if props of typeA match partially', function () {
+        var errors = this.validator({
+          a: 1, // < 'a' selects typeA for validation
+          x: 1234, // <This is supposed to be a string
+        })
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if props of typeB match partially', function () {
+        var errors = this.validator({
+          b: 1, // < 'a' selects typeB for validation
+          x: 1234, // <This is supposed to be a boolean
+        })
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if props of typeC match partially', function () {
+        var errors = this.validator({
+          c: 1, // < 'c' selects typeC for validation
+          x: 1234, // <This is supposed to be an object
+        })
+        expect(errors.length).toEqual(1);
+      });
+
+      it('should return error if type props missing', function () {
+        var errors = this.validator({
+          z: 2
+        })
+        expect(errors.length).toEqual(2);
+      });
+
+    })
 
   });
 
