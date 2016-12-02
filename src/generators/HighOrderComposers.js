@@ -240,7 +240,7 @@ const HighOrderComposers = {
 
     return [
       `if (value.${property} == null) {`,
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}, {name: '${property}'}));`,
+        `\terrors.push(new RAMLError(path.concat(['${property}']), ${ERROR_MESSAGE}, {name: '${property}'}));`,
       `} else {`,
         `\terrors = errors.concat(${validatorFn}(value.${property}, path.concat(['${property}'])));`,
       `}`
