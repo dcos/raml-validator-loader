@@ -1526,7 +1526,7 @@ describe('RAMLValidator', function () {
         ].join('\n'), strictConfig);
       });
 
-      fit('should validate if object has only one key that matches the regex', function () {
+      it('should validate if object has only one key that matches the regex', function () {
         var errors = this.validator({'key/%/--': 'string'});
         expect(errors.length).toEqual(0);
       });
