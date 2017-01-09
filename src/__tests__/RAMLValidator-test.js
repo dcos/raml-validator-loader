@@ -722,8 +722,56 @@ describe('RAMLValidator', function () {
       expect(errors.length).toEqual(0);
     });
 
+    it('should not be case-insensitive', function () {
+      var errors = this.validator('A');
+      expect(errors.length).toEqual(0);
+
+      var errors = this.validator('B');
+      expect(errors.length).toEqual(0);
+
+      var errors = this.validator('C');
+      expect(errors.length).toEqual(0);
+    });
+
     it('should return error if non-enum option given', function () {
       var errors = this.validator('x');
+      expect(errors.length).toEqual(1);
+    });
+
+  });
+
+  describe('Enum Type (Case-Sensitive)', function () {
+
+    beforeEach(function() {
+      let classicConfig = {caseInsensitiveEnums: false};
+      this.validator = createValidator([
+        '#%RAML 1.0',
+        'types:',
+        '  TestType:',
+        '    type: string',
+        '    enum: [ a, b, c ]'
+      ].join('\n'), classicConfig);
+    });
+
+    it('should validate if one of the enum option is given', function () {
+      var errors = this.validator('a');
+      expect(errors.length).toEqual(0);
+
+      errors = this.validator('b');
+      expect(errors.length).toEqual(0);
+
+      errors = this.validator('c');
+      expect(errors.length).toEqual(0);
+    });
+
+    it('should be case-sensitive', function () {
+      var errors = this.validator('A');
+      expect(errors.length).toEqual(1);
+
+      var errors = this.validator('B');
+      expect(errors.length).toEqual(1);
+
+      var errors = this.validator('C');
       expect(errors.length).toEqual(1);
     });
 

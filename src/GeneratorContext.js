@@ -29,7 +29,15 @@ class GeneratorContext {
        *
        * @property {boolean}
        */
-      missingPropertiesOnTheirPath: true
+      missingPropertiesOnTheirPath: true,
+
+      /**
+       * If this flag is set to `true` all enum comparisons will be done
+       * case-insensitive.
+       *
+       * @property {boolean}
+       */
+      caseInsensitiveEnums: true
 
     };
 

@@ -60,7 +60,7 @@ module.exports = {
   getInlineTypeComment(itype) {
     let facets = itype.getFixedFacets();
     let comment = 'This is an in-line specialisation of ' + this.getInlineTypeBase(itype)
-      + '\n with the following constraints:\n\n';
+      + '\nwith the following constraints:\n\n';
     return comment + Object.keys(facets).map(function(name) {
       if (name === 'items') {
         return `- ${name}: ${this.getTypeName(facets[name].extras.nominal)}`;
