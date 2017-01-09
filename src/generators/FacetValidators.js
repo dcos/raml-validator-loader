@@ -117,7 +117,9 @@ const FACET_FRAGMENT_GENERATORS = {
    * [String] `pattern`: Regular expression this value should match against
    */
   pattern: function(value, context) {
-    let REGEX = context.getConstantExpression('REGEX', `/${value}/`);
+    let REGEX = context.getConstantExpression(
+      'REGEX', `new RegExp('${value.replace(/'/g, '\\\'')}')`
+    );
     let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'STRING_PATTERN', 'Must match the pattern "{pattern}"');
 

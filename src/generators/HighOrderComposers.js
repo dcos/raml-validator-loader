@@ -146,7 +146,9 @@ const HighOrderComposers = {
       }
 
       fragments = regexMatchers.reduce(function(fragments, [regex, required, validatorFn]) {
-        let REGEX = context.getConstantExpression('REGEX', `/${regex}/`);
+        let REGEX = context.getConstantExpression(
+          'REGEX', `new RegExp('${regex.replace(/'/g, '\\\'')}')`
+        );
         let ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
           'PROP_MISSING_MATCH', 'Missing a property that matches `{name}`');
 
@@ -217,7 +219,9 @@ const HighOrderComposers = {
           ]);
         }, []),
         regexMatchers.reduce(function(fragments, [regex, unused1, unused2]) {
-          let REGEX = context.getConstantExpression('REGEX', `/${regex}/`);
+          let REGEX = context.getConstantExpression(
+            'REGEX', `new RegExp('${regex.replace(/'/g, '\\\'')}')`
+          );
           return fragments.concat([
             `if (${REGEX}.exec(key)) return;`
           ]);
