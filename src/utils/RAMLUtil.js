@@ -164,7 +164,7 @@ module.exports = {
     // If the type is still anonymous, try to lookup it's type by
     // traversing the super classes
     //
-    if (itype.nameId() == null) {
+    if ((itype.nameId() == null) || (itype.nameId() === '')) {
       return this.getTypeName(itype.superTypes()[0]);
     }
 
