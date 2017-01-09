@@ -1512,6 +1512,26 @@ describe('RAMLValidator', function () {
 
     });
 
+    describe('Regex that contains weird keywords', function () {
+
+      beforeEach(function() {
+        let strictConfig = {patternPropertiesAreOptional: false};
+        this.validator = createValidator([
+          '#%RAML 1.0',
+          'types:',
+          '  TestType:',
+          '    type: object',
+          '    properties:',
+          '      /^[a-z0-9]+\/\%\/\-+$/: string',
+        ].join('\n'), strictConfig);
+      });
+
+      fit('should validate if object has only one key that matches the regex', function () {
+        var errors = this.validator({'key/%/--': 'string'});
+        expect(errors.length).toEqual(0);
+      });
+    });
+
     describe('Multiple RegExp', function () {
 
       beforeEach(function() {
