@@ -1,4 +1,8 @@
 ## Unversioned
+### Added
+- Customizable `errorMessages` to the run-time instance
+- Adding support for functions as error message
+
 ### Fixed
 - Accepting webpack queries to configure generator options
 - Adding eslint rules to the project

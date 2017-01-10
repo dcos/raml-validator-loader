@@ -18,6 +18,10 @@ function RAMLError(path, message, _messageVariables) {
   Object.defineProperty(this, 'message', {
     enumerable: true,
     get: function() {
+      if (typeof message === 'function') {
+        return message(messageVariables, path);
+      }
+
       return message.replace(REPLACE_MESSAGE_TEMPLATE, function(match) {
         return ''+messageVariables[match.slice(1,-1)] || '';
       });
