@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import RAML from 'raml-1-parser';
 
 import Generator from './Generator';
@@ -7,8 +6,11 @@ import GeneratorContext from './GeneratorContext';
 
 /**
  * Entry point of the raml-validator-loader
+ *
+ * @param {String} source - The source code of the RAML document
+ * @returns {String} Returns the transpiled JS code blob
  */
-module.exports = function(source) {
+module.exports = function (source) {
 
   // Mark the contents cacheable
   this.cacheable();
@@ -20,12 +22,13 @@ module.exports = function(source) {
   //
   var raml = RAML.loadApiSync(this.resourcePath, {
     fsResolver: {
-      content: (function(path) {
-        if (path == this.resourcePath) {
+      content: (function (path) {
+        if (path === this.resourcePath) {
           return source;
         }
 
         this.addDependency(path);
+
         return fs.readFileSync(path).toString();
       }).bind(this)
     }
@@ -35,7 +38,7 @@ module.exports = function(source) {
   var ctx = new GeneratorContext();
 
   // Use all types in this RAML specification
-  raml.types().forEach(function(type) {
+  raml.types().forEach(function (type) {
     ctx.uses( type.runtimeType() );
   });
 

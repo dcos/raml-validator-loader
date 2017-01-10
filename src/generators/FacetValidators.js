@@ -1,33 +1,40 @@
 import FragmentFactory from '../utils/FragmentFactory';
-import RAMLUtil from '../utils/RAMLUtil';
 
 const FACET_FRAGMENT_GENERATORS = {
 
   /**
    * [Number]  `maximum`: Maximum numeric value
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  maximum: function(value, context) {
+  maximum(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'NUMBER_MAX', 'Must be smaller than or equal to {value}');
 
     return FragmentFactory.testAndPushError(
       `value > ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [Number] `minimum`: Minimum numeric value
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  minimum: function(value, context) {
+  minimum(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'NUMBER_MIN', 'Must be bigger than or equal to {value}');
 
     return FragmentFactory.testAndPushError(
       `value < ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
@@ -35,10 +42,13 @@ const FACET_FRAGMENT_GENERATORS = {
    * [Number] `format` : The format of the value
    *
    * Must be one of: int32, int64, int, long, float, double, int16, int8
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  format: function(value, context) {
-    const IS_FLOAT = '(value % 1 !== 0)';
-    const IS_INT   = '(value % 1 === 0)';
+  format(value, context) {
+    const IS_INT = '(value % 1 === 0)';
     const FLOAT_HELPER = context.getConstantExpression('HELPERS',
       'new Float32Array(1)');
 
@@ -78,7 +88,7 @@ const FACET_FRAGMENT_GENERATORS = {
         // decimals in the number
         //
         condition = `Math.abs((${FLOAT_HELPER}[0] = value) - ${FLOAT_HELPER}[0])`
-          + ` < Math.pow(10, -(value+'.').split('.')[1].length-1)`;
+          + ' < Math.pow(10, -(value+\'.\').split(\'.\')[1].length-1)';
         break;
 
       case 'double':
@@ -86,7 +96,7 @@ const FACET_FRAGMENT_GENERATORS = {
         break;
 
       default:
-        throw new TypeError(`Unknown value for the 'format' facet: '${value}'`)
+        throw new TypeError(`Unknown value for the 'format' facet: '${value}'`);
     }
 
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
@@ -95,28 +105,36 @@ const FACET_FRAGMENT_GENERATORS = {
     return FragmentFactory.testAndPushError(
       `!(${condition})`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [Number] `multipleOf` : Value must be divisable by this value
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  multipleOf: function(value, context) {
+  multipleOf(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'NUMBER_MULTIPLEOF', 'Must be multiple of {value}');
 
     return FragmentFactory.testAndPushError(
       `value % ${value} !== 0`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [String] `pattern`: Regular expression this value should match against
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  pattern: function(value, context) {
+  pattern(value, context) {
     const REGEX = context.getConstantExpression(
       'REGEX', `new RegExp('${value.replace(/'/g, '\\\'')}')`
     );
@@ -132,88 +150,112 @@ const FACET_FRAGMENT_GENERATORS = {
 
   /**
    * [String] `minLength`: Minimum length of the string
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  minLength: function(value, context) {
+  minLength(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'LENGTH_MIN', 'Must be at least {value} characters long');
 
     return FragmentFactory.testAndPushError(
       `value.length < ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [String] `maxLength`: Maximum length of the string
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  maxLength: function(value, context) {
+  maxLength(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'LENGTH_MAX', 'Must be at most {value} characters long');
 
     return FragmentFactory.testAndPushError(
       `value.length > ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [Array] `minItems` : Minimum amount of items in the array
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  minItems: function(value, context) {
+  minItems(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'ITEMS_MIN', 'Must contain at least {value} items in the array');
 
     return FragmentFactory.testAndPushError(
       `value.length < ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [Array] `maxItems` : Maximum amount of items in the array
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  maxItems: function(value, context) {
+  maxItems(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'ITEMS_MAX', 'Must contain at most {value} items in the array');
 
     return FragmentFactory.testAndPushError(
       `value.length > ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [Array] `uniqueItems` : All array items MUST be unique
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  uniqueItems: function(value, context) {
+  uniqueItems(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'ITEMS_UNIQUE', 'Must contain only unique items');
 
     return [
-      `if ((function() {`,
-        `\tvar valuesSoFar = Object.create(null);`,
-        `\tfor (var i = 0; i < value.length; ++i) {`,
-          `\t\tvar val = value[i];`,
-          `\t\tif (val in valuesSoFar) {`,
-            `\t\t\treturn true;`,
-          `\t\t}`,
-          `\t\tvaluesSoFar[val] = true;`,
-        `\t}`,
-        `\treturn false;`,
-      `})()) {`,
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
-      `}`
+      'if ((function() {',
+      '\tvar valuesSoFar = Object.create(null);',
+      '\tfor (var i = 0; i < value.length; ++i) {',
+      '\t\tvar val = value[i];',
+      '\t\tif (val in valuesSoFar) {',
+      '\t\t\treturn true;',
+      '\t\t}',
+      '\t\tvaluesSoFar[val] = true;',
+      '\t}',
+      '\treturn false;',
+      '})()) {',
+      `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+      '}'
     ];
   },
 
   /**
    * [Array] `items` : Type for the items
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  items: function(value, context) {
+  items(value, context) {
 
     // The value passed is an `InheritedType` instance, that describes the
     // RAML metadata. In order to access the underlying run-time information,
@@ -223,11 +265,11 @@ const FACET_FRAGMENT_GENERATORS = {
 
     // Validate every child
     return [
-      `errors = value.reduce(function(errors, value, i) {`,
-      `\treturn errors.concat(`,
+      'errors = value.reduce(function(errors, value, i) {',
+      '\treturn errors.concat(',
       `\t\t${validatorFn}(value, path.concat([i]))`,
-      `\t);`,
-      `}, errors);`
+      '\t);',
+      '}, errors);'
     ];
   },
 
@@ -238,36 +280,48 @@ const FACET_FRAGMENT_GENERATORS = {
 
   /**
    * [Object] `minProperties`: Minimum number of properties
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  minProperties: function(value, context) {
+  minProperties(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'PROPS_MIN', 'Must contain at least {value} properties in the object');
 
     return FragmentFactory.testAndPushError(
       `Object.keys(value).length < ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [Object] `maxProperties`: Maximum number of properties
+   *
+   * @param {String} value - The facet value
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  maxProperties: function(value, context) {
+  maxProperties(value, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'PROPS_MAX', 'Must contain at most {value} properties in the object');
 
     return FragmentFactory.testAndPushError(
       `Object.keys(value).length > ${value}`,
       ERROR_MESSAGE,
-      { value: value }
+      { value }
     );
   },
 
   /**
    * [General] `enum`: Enumeration of the given values
+   *
+   * @param {Array} values - The enum options
+   * @param {GeneratorContext} context - The current generator context
+   * @return {Array} - The facet validator code lines
    */
-  enum: function(values, context) {
+  enum(values, context) {
     const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
       'ENUM', 'Must be one of {values}');
 
@@ -297,10 +351,15 @@ const FACET_FRAGMENT_GENERATORS = {
   },
 
   /**
-   * (Handled by the HighOrderComposers, since it's not so simple to be
-   * implemented as a fragment generator)
+   * This is only a placeholder in order to avoid throwing an error
+   * when this facet is encountered.
+   *
+   * Implemented in the HighOrderComposers, since it's not so simple to be
+   * implemented as a facet validator.
+   *
+   * @return {Array} - The facet validator code lines
    */
-  additionalProperties: function() {
+  additionalProperties() {
     return [];
   }
 
@@ -319,7 +378,8 @@ module.exports = {
    */
   generateFacetFragments(facets, context) {
     const keys = Object.keys(facets);
-    return keys.reduce(function(fragments, facet) {
+
+    return keys.reduce(function (fragments, facet) {
       if (FACET_FRAGMENT_GENERATORS[facet] == null) {
         throw new TypeError(`Unknown facet: '${facet}'`);
       }

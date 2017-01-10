@@ -58,7 +58,7 @@ class GeneratorContext {
    * @returns {String} - Returns the function javascript source
    */
   uses(itype) {
-    let ref = RAMLUtil.getTypeRef(itype);
+    const ref = RAMLUtil.getTypeRef(itype);
 
     if (!this.typesProcessed[ref]) {
       this.typesQueue.push(itype);
@@ -70,15 +70,21 @@ class GeneratorContext {
 
   /**
    * Shift the next type in the type queue
+   *
+   * @returns {ITypeDefinition|undefined} The next item on queue or undefined if empty
    */
   nextTypeInQueue() {
     return this.typesQueue.shift();
   }
 
   /**
-   * @param {String} tableName
-   * @param {String} name
-   * @param {String} value
+   * Create a constant string in the string table and return a code reference
+   * to it
+   *
+   * @param {String} tableName - The name of the table to put a string into
+   * @param {String} name - The name of the string
+   * @param {String} value - The value of the string
+   * @returns {String} The code reference to the table entry
    */
   getConstantString(tableName, name, value) {
     if (this.constantTables[tableName] == null) {
@@ -93,6 +99,13 @@ class GeneratorContext {
     return `${tableName}.${name}`;
   }
 
+  /**
+   * Create a constant expression and get a code reference to it
+   *
+   * @param {String} tableName - The name of the table to put a string into
+   * @param {String} expression - The constant expression
+   * @returns {String} The code reference to the table entry
+   */
   getConstantExpression(tableName, expression) {
     if (this.constantTables[tableName] == null) {
       this.constantTables[tableName] = [];

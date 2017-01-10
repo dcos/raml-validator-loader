@@ -58,10 +58,11 @@ module.exports = {
    * @returns {String} The comment to the specialised inline type
    */
   getInlineTypeComment(itype) {
-    let facets = itype.getFixedFacets();
-    let comment = 'This is an in-line specialisation of ' + this.getInlineTypeBase(itype)
+    const facets = itype.getFixedFacets();
+    const comment = 'This is an in-line specialisation of ' + this.getInlineTypeBase(itype)
       + '\nwith the following constraints:\n\n';
-    return comment + Object.keys(facets).map(function(name) {
+
+    return comment + Object.keys(facets).map(function (name) {
       if (name === 'items') {
         return `- ${name}: ${this.getTypeName(facets[name].extras.nominal)}`;
       } else {
@@ -100,14 +101,15 @@ module.exports = {
    */
   getInlineTypeName(itype) {
     // Calculate the checksum of the facets
-    let facets = itype.getFixedFacets();
-    let facetKeys = Object.keys(facets).sort();
-    let expr = facetKeys.reduce(function(expr, key) {
+    const facets = itype.getFixedFacets();
+    const facetKeys = Object.keys(facets).sort();
+    const expr = facetKeys.reduce(function (expr, key) {
       return expr + '|' + key + '=' + facets[key];
     }, '');
 
     // Calculate unique name
-    let typeName = this.getInlineTypeBase(itype);
+    const typeName = this.getInlineTypeBase(itype);
+
     return 'inline' + typeName[0].toUpperCase() + typeName.substr(1) + '_' +
             crypto.createHash('md5').update(expr).digest('hex');
   },
@@ -191,6 +193,9 @@ module.exports = {
 
   /**
    * Return the reference to the given type
+   *
+   * @param {ITypeDefinition} itype - The runtime type of the RAML definition
+   * @returns {string} Returns the code reference to the given type
    */
   getTypeRef(itype) {
     return this.getTypeGroup(itype) + '.' + this.getTypeName(itype);
@@ -208,7 +213,7 @@ module.exports = {
       return itype;
     }
 
-    return itype.allSuperTypes().find(function(type) {
+    return itype.allSuperTypes().find(function (type) {
       return type.isBuiltIn();
     });
   },
@@ -220,7 +225,7 @@ module.exports = {
    * @returns {string|null} The builtin type name or null if not found
    */
   getBuiltinTypeName(itype) {
-    let builtinType = this.getBuiltinType(itype);
+    const builtinType = this.getBuiltinType(itype);
     if (builtinType == null) {
       return null;
     }

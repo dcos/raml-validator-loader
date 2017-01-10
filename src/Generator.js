@@ -11,11 +11,11 @@ module.exports = {
    * @param {String} desc - The comment string
    * @returns {Array} Returns an array of lines for the comment block
    */
-  commentBlock: function(desc) {
+  commentBlock(desc) {
     return [].concat(
-      [ '/**' ],
+      ['/**'],
       desc.split('\n').map((line) => ` * ${line}`),
-      [ ' */']
+      [' */']
     );
   },
 
@@ -25,7 +25,9 @@ module.exports = {
    * @param {GeneratorContext} context - The generator context to use
    * @returns {String} The generated module source code
    */
-  generate: function(context) {
+  /* eslint-disable no-cond-assign */
+  /* eslint-disable no-continue */
+  generate(context) {
     let itype;
     let privateValidatorFragments = [
       'var PrivateValidators = {'
@@ -38,19 +40,19 @@ module.exports = {
     // The following loop generates the validators for every type in the context
     // A validator generator might push more types while it's being processed.
     //
-    while (itype = context.nextTypeInQueue()) {
-      let typeName = RAMLUtil.getTypeName(itype);
+    while ((itype = context.nextTypeInQueue()) != null) {
+      const typeName = RAMLUtil.getTypeName(itype);
       let fragments = [];
 
       // 'Any' is a special case, since it always validates. Therefore we use
       // a shorter alternative that just returns an empty array
       if (typeName === 'any') {
         validatorFragments.push(
-          `/**`,
-          ` * (anything)`,
-          ` */`,
+          '/**',
+          ' * (anything)',
+          ' */',
           `\t${typeName}: function(value, _path) { return [] },`,
-          ``
+          ''
         );
         continue;
       }
@@ -78,8 +80,8 @@ module.exports = {
           TypeValidator.generateTypeValidator(itype, context),
           '\t\t'
         ),
-        [ '\t\treturn errors;',
-          '\t},', '' ]
+        ['\t\treturn errors;',
+          '\t},', '']
       );
 
       // Inline types are stored in a different object, not exposed to the user
@@ -99,28 +101,28 @@ module.exports = {
     // While processing the types, the validator generators will populate
     // constants in the global constants table(s).
     //
-    let globalTableFragments = Object.keys(context.constantTables)
-      .reduce(function(lines, tableName) {
-        let table = context.constantTables[tableName];
+    const globalTableFragments = Object.keys(context.constantTables)
+      .reduce(function (lines, tableName) {
+        const table = context.constantTables[tableName];
         if (Array.isArray(table)) {
           // Array of anonymous expressions
           return lines.concat(
-            [ `var ${tableName} = [` ],
-            GeneratorUtil.indentFragments( table ).map(function(line) {
+            [`var ${tableName} = [`],
+            GeneratorUtil.indentFragments( table ).map(function (line) {
               return `${line},`;
             }),
-            [ `];` ]
+            ['];']
           );
         } else {
           // Object of named expressions
           return lines.concat(
-            [ `var ${tableName} = {` ],
+            [`var ${tableName} = {`],
             GeneratorUtil.indentFragments(
-              Object.keys(table).map(function(key) {
-                return `${key}: ${table[key]},`
+              Object.keys(table).map(function (key) {
+                return `${key}: ${table[key]},`;
               })
             ),
-            [ `};`, '' ]
+            ['};', '']
           );
         }
       }, []);
@@ -128,7 +130,7 @@ module.exports = {
     //
     // Compose exports
     //
-    let variableExports = [];
+    const variableExports = [];
     if (context.constantTables['ERROR_MESSAGES'] != null) {
       variableExports.push('Validators.ERROR_MESSAGES = ERROR_MESSAGES;');
     }
@@ -154,5 +156,7 @@ module.exports = {
       '})();'
     ).join('\n');
   }
+  /* eslint-enable no-cond-assign */
+  /* eslint-enable no-continue */
 
 };
