@@ -101,42 +101,71 @@ module.exports = {
     // While processing the types, the validator generators will populate
     // constants in the global constants table(s).
     //
-    const globalTableFragments = Object.keys(context.constantTables)
-      .reduce(function (lines, tableName) {
-        const table = context.constantTables[tableName];
-        if (Array.isArray(table)) {
-          // Array of anonymous expressions
-          return lines.concat(
-            [`var ${tableName} = [`],
-            GeneratorUtil.indentFragments( table ).map(function (line) {
-              return `${line},`;
-            }),
-            ['];']
-          );
-        } else {
-          // Object of named expressions
-          return lines.concat(
-            [`var ${tableName} = {`],
-            GeneratorUtil.indentFragments(
-              Object.keys(table).map(function (key) {
-                return `${key}: ${table[key]},`;
-              })
-            ),
-            ['};', '']
-          );
-        }
-      }, []);
+    const globalTableFragments = [].concat(
+      'var DEFAULT_CONTEXT = {',
+      GeneratorUtil.indentFragments(
+        Object.keys(context.constantTables).reduce(function (lines, tableName) {
+          const table = context.constantTables[tableName];
+          if (Array.isArray(table)) {
+            // Array of anonymous expressions
+            return lines.concat(
+              [`${tableName}: [`],
+              GeneratorUtil.indentFragments( table ).map(function (line) {
+                return `${line},`;
+              }),
+              ['],']
+            );
+          } else {
+            // Object of named expressions
+            return lines.concat(
+              [`${tableName}: {`],
+              GeneratorUtil.indentFragments(
+                Object.keys(table).map(function (key) {
+                  return `${key}: ${table[key]},`;
+                })
+              ),
+              ['},', '']
+            );
+          }
+        }, [])
+      ),
+      '}'
+    );
 
     //
-    // Compose exports
+    // Compose validator class
     //
-    const variableExports = [];
-    if (context.constantTables['ERROR_MESSAGES'] != null) {
-      variableExports.push('Validators.ERROR_MESSAGES = ERROR_MESSAGES;');
-    }
-    if (variableExports.length) {
-      variableExports.unshift('// Expose properties that can be overriden remotely');
-    }
+    const validatorClass = [].concat(
+      'var RAMLValidator = function(config) {',
+      GeneratorUtil.indentFragments([].concat(
+        'if (!config) config = {};',
+        'var context = Object.assign({}, DEFAULT_CONTEXT);',
+        '',
+        '// Override errorMessages through config',
+        'if (config.errorMessages) {',
+        '\tcontext.ERROR_MESSAGES = Object.assign(',
+        '\t\t{},',
+        '\t\tcontext.ERROR_MESSAGES,',
+        '\t\tconfig.errorMessages',
+        '\t)',
+        '}',
+        '',
+        privateValidatorFragments,
+        '',
+        validatorFragments,
+        '',
+        '// Expose validator functions, bound to local overrides',
+        'Object.keys(Validators).forEach((function(key) {',
+        '\tthis[key] = Validators[key];',
+        '}).bind(this));',
+        '',
+        '// Expose .clone function that allows further overrides to apply',
+        'this.clone = function(cloneConfig) {',
+        '\treturn new RAMLValidator(Object.assign(config, cloneConfig));',
+        '}'
+      )),
+      '}'
+    );
 
     //
     // Compose the individual fragments into the full module source
@@ -146,13 +175,9 @@ module.exports = {
         RAMLErrorPayload,
         globalTableFragments,
         '',
-        privateValidatorFragments,
+        validatorClass,
         '',
-        validatorFragments,
-        '',
-        variableExports,
-        '',
-        'return Validators;',
+        'return new RAMLValidator();',
       '})();'
     ).join('\n');
   }

@@ -96,7 +96,7 @@ class GeneratorContext {
     }
 
     // Return constant name
-    return `${tableName}.${name}`;
+    return `context.${tableName}.${name}`;
   }
 
   /**
@@ -117,7 +117,7 @@ class GeneratorContext {
       this.constantTables[tableName].push(expression);
     }
 
-    return `${tableName}[${index}]`;
+    return `context.${tableName}[${index}]`;
   }
 
 }
