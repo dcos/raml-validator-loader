@@ -25,7 +25,7 @@ function getAdditionalPropertiesValue(itype, defaultValue=true) {
   }
 
   // The metadata KnownPropertyRestriction is defined when the
-  // additionalProperties facet is defiend and it's value contains
+  // additionalProperties facet is defined and it's value contains
   // the facet's value
   const knownProperty = typeAdapter.meta().find(function (meta) {
     return meta.constructor.name === 'KnownPropertyRestriction';
@@ -64,8 +64,8 @@ const HighOrderComposers = {
       // Pick the validation with the fewest possible errors
       //
       // If == 0 : The union type validation succeeded
-      // If  > 0 : The union with the fewest errors, and therfore the most
-      //           probabel match.
+      // If  > 0 : The union with the fewest errors, and therefore the most
+      //           probable match.
       //
       '})[0]);'
     );
@@ -211,7 +211,7 @@ const HighOrderComposers = {
     }
 
     // The `additionalProperties` facet is a bit more complicated, since it
-    // requires traversal thorugh it's keys
+    // requires traversal through it's keys
     if (getAdditionalPropertiesValue(itype) === false) {
       const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
         'PROP_ADDITIONAL_PROPS', 'Unexpected extraneous property `{name}`');
@@ -249,7 +249,7 @@ const HighOrderComposers = {
   },
 
   /**
-   * Compose a required property validator framgent
+   * Compose a required property validator fragment
    *
    * @param {String} property - The name of the property
    * @param {String} validatorFn - The name of the type validator function
@@ -281,7 +281,7 @@ const HighOrderComposers = {
   },
 
   /**
-   * Compose a property validator framgent
+   * Compose a property validator fragment
    *
    * @param {String} property - The name of the property
    * @param {String} validatorFn - The name of the type validator function

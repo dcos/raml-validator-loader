@@ -18,7 +18,7 @@ module.exports = function (source) {
   // Override the default filesystem resolver in order to:
   //
   // 1) Provide a custom content for the source file
-  // 2) Track dependant files in order for webpack to invalidate caches
+  // 2) Track dependent files in order for webpack to invalidate caches
   //
   const raml = RAML.loadApiSync(this.resourcePath, {
     fsResolver: {
