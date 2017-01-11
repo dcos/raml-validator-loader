@@ -1,4 +1,4 @@
-# raml-validator-loader
+# raml-validator-loader [![Velocity](http://jenkins.mesosphere.com/buildStatus/icon?job=raml-validator-loader-master)](http://jenkins.mesosphere.com/view/DCOS%20UI/job/raml-validator-loader-master/)
 
 A webpack plugin that converts RAML rules into pure javascript-only validation routines
 
@@ -35,14 +35,14 @@ const CustomTypeValidators = TypeValidators.clone({
 	'errorMessages': {
 		// You can provide a string override
 		TYPE_NOT_OBJECT: 'Expecting an object here',
-		
+
 		// Or a function override if you want more control over
 		// the error message
 		STRING_PATTERN: (templateVars, path) => {
 			if (path[0] == 'name') {
 				return 'Name must only contain letters';
 			}
-			
+
 			return `Must match '${templateVars.pattern}'`;
 		}
 	}
