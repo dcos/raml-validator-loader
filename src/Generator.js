@@ -1,7 +1,8 @@
-import RAMLUtil from './utils/RAMLUtil';
+import DefaultErrorMessages from './constants/DefaultErrorMessages';
 import GeneratorUtil from './utils/GeneratorUtil';
+import RAMLErrorPayload from './constants/RAMLErrorPayload';
+import RAMLUtil from './utils/RAMLUtil';
 import TypeValidator from './generators/TypeValidator';
-import RAMLErrorPayload from './payloads/RAMLError';
 
 module.exports = {
 
@@ -98,6 +99,24 @@ module.exports = {
     validatorFragments.push('};');
 
     //
+    // Compose default error messages, by keeping only the error
+    // messages used by the validators
+    //
+    const defaultErrorMessagesTable = 'var DEFAULT_ERROR_MESSAGES = ' +
+      JSON.stringify(
+        context.usedErrors.reduce(
+          function (table, errorConstant) {
+            table[errorConstant] = DefaultErrorMessages[errorConstant];
+
+            return table;
+          },
+          {}
+        ),
+        null,
+        2
+      );
+
+    //
     // While processing the types, the validator generators will populate
     // constants in the global constants table(s).
     //
@@ -142,13 +161,11 @@ module.exports = {
         'var context = Object.assign({}, DEFAULT_CONTEXT);',
         '',
         '// Override errorMessages through config',
-        'if (config.errorMessages) {',
-        '\tcontext.ERROR_MESSAGES = Object.assign(',
-        '\t\t{},',
-        '\t\tcontext.ERROR_MESSAGES,',
-        '\t\tconfig.errorMessages',
-        '\t)',
-        '}',
+        'context.ERROR_MESSAGES = Object.assign(',
+        '\t{},',
+        '\tDEFAULT_ERROR_MESSAGES,',
+        '\tconfig.errorMessages',
+        ')',
         '',
         privateValidatorFragments,
         '',
@@ -173,6 +190,8 @@ module.exports = {
     return [].concat(
       'module.exports = (function() {',
         RAMLErrorPayload,
+        defaultErrorMessagesTable,
+        '',
         globalTableFragments,
         '',
         validatorClass,

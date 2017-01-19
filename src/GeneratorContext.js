@@ -45,6 +45,7 @@ class GeneratorContext {
     this.typesProcessed = {};
     this.typesQueue = [];
     this.options = Object.assign(this.options, options);
+    this.usedErrors = [];
   }
 
   /**
@@ -66,6 +67,23 @@ class GeneratorContext {
     }
 
     return ref;
+  }
+
+  /**
+   * Mark a particular error constant as used.
+   *
+   * This approach is used as an optimisation in order to reduce the total
+   * number of error messages included for smaller output size, when some
+   * of them are not used.
+   *
+   * @param {String} errorConstant - The error constant
+   */
+  useError(errorConstant) {
+    if (this.usedErrors.indexOf(errorConstant) !== -1) {
+      return;
+    }
+
+    this.usedErrors.push(errorConstant);
   }
 
   /**

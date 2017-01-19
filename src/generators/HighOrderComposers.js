@@ -162,8 +162,6 @@ const HighOrderComposers = {
         const REGEX = context.getConstantExpression(
           'REGEX', `new RegExp('${regex.replace(/'/g, '\\\'')}')`
         );
-        const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-          'PROP_MISSING_MATCH', 'Missing a property that matches `{name}`');
 
         fragments.push(
           'matched = regexProps.filter(function(key) {',
@@ -173,9 +171,10 @@ const HighOrderComposers = {
 
         // Check for required props
         if (required) {
+          context.useError('PROP_MISSING_MATCH');
           fragments.push(
             'if (matched.length === 0) {',
-            `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}, {name: '${regex}'}));`,
+            `\terrors.push(new RAMLError(path, context, "PROP_MISSING_MATCH", {pattern: '${regex}'}));`,
             '}'
           );
         }
@@ -213,8 +212,6 @@ const HighOrderComposers = {
     // The `additionalProperties` facet is a bit more complicated, since it
     // requires traversal through it's keys
     if (getAdditionalPropertiesValue(itype) === false) {
-      const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-        'PROP_ADDITIONAL_PROPS', 'Unexpected extraneous property `{name}`');
 
       // Don't re-define props if we already have them
       if (!hasPropsDefined) {
@@ -222,6 +219,8 @@ const HighOrderComposers = {
           'var props = Object.keys(value);'
         );
       }
+
+      context.useError('PROP_ADDITIONAL_PROPS');
 
       // Iterate over properties and check if the validators match
       fragments = fragments.concat(
@@ -240,7 +239,7 @@ const HighOrderComposers = {
             `if (${REGEX}.exec(key)) return;`
           ]);
         }, []),
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}, {name: key}));`,
+        '\terrors.push(new RAMLError(path, context, "PROP_ADDITIONAL_PROPS", {name: key}));',
         '});'
       );
     }
@@ -258,22 +257,22 @@ const HighOrderComposers = {
    */
   composeRequiredProperty(property, validatorFn, context) {
     let errorPath = 'path';
-    let ERROR_MESSAGE;
+    let ERROR_TYPE;
 
     // If we are configured to show missing properties to their own path use
     // different error message and different error path.
     if (context.options.missingPropertiesOnTheirPath) {
       errorPath = `path.concat(['${property}'])`;
-      ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-            'PROP_MISSING', 'Missing property');
+      ERROR_TYPE = 'PROP_IS_MISSING';
     } else {
-      ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-            'PROP_MISSING', 'Missing property `{name}`');
+      ERROR_TYPE = 'PROP_MISSING';
     }
+
+    context.useError(ERROR_TYPE);
 
     return [
       `if (value.${property} == null) {`,
-      `\terrors.push(new RAMLError(${errorPath}, ${ERROR_MESSAGE}, {name: '${property}'}));`,
+      `\terrors.push(new RAMLError(${errorPath}, context, "${ERROR_TYPE}", {name: '${property}'}));`,
       '} else {',
       `\terrors = errors.concat(${validatorFn}(value.${property}, path.concat(['${property}'])));`,
       '}'

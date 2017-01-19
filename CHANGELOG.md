@@ -1,12 +1,15 @@
 ## Unversioned
 ### Added
-- Customizable `errorMessages` to the run-time instance
+- Adding `Type.clone()` support for enabling runtime customizations
+- Adding `errorMessages` as a customizable property in the `.clone` function
 - Adding support for functions as error message
+- Adding `type` and `variables` to the error message
 
 ### Fixed
 - Accepting webpack queries to configure generator options
 - Adding eslint rules to the project
-
+- Using double brackets for error message variables (ex: `Missing {{name}}`)
+- Extracted all error messages to a separate constants file
 
 ## v0.1.7 - 10-01-2017
 ### Fixed

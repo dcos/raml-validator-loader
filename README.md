@@ -278,7 +278,6 @@ The following **types** are not yet implemented:
 - [`date-only`](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
 - [`time-only `](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
 - [`datetime-only `](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
-- [`datetime`](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#date)
 - [`file`](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#file)
 
 The following **concepts** are not yet implemented:
