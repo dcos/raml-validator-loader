@@ -154,6 +154,14 @@ if (errors.length > 0) {
 
 - **Array** - Returns the path in the object where the validation error ocurred, as an array of path components. For example: `['objects', 0, 'name']`
 
+#### Property `.type`
+
+- **String** - Returns the type of the error as a string. For example `"PROP_IS_MISSING"`
+
+#### Property `.variables`
+
+- **Object** - Returns an object with the template variable values for the error message. For example `{value: 2}` for the `ITEMS_MAX` error type, in order to be able to compose the dynamic result of `"Must contain at most 2 items in the array"`.
+
 #### Property `.message`
 
 - **String** - Returns the human-readable description of the error. For example: `Missing property 'name'`.
@@ -163,81 +171,109 @@ if (errors.length > 0) {
 The following error messages are used by the RAML validator. You can override them using the `.clone({errorMessages: ...})` function.
 
 <table>
-	<tr>
-		<th>Constant Name</th>
-		<th>Default Value</th>
-	</tr>
+    <tr>
+        <th>Error Type</th>
+        <th>Default Value</th>
+    </tr>
     <tr>
         <td><code>ENUM</code></td>
-        <td>Must be one of {values}</td>
+        <td>Must be one of {{values}}</td>
     </tr>
     <tr>
         <td><code>ITEMS_MAX</code></td>
-        <td>Must contain at most {value} items in the array</td>
+        <td>Must contain at most {{value}} items in the array</td>
     </tr>
     <tr>
         <td><code>ITEMS_MIN</code></td>
-        <td>Must contain at least {value} items in the array</td>
+        <td>Must contain at least {{value}} items in the array</td>
+    </tr>
+    <tr>
+        <td><code>ITEMS_UNIQUE</code></td>
+        <td>Must contain only unique items</td>
     </tr>
     <tr>
         <td><code>LENGTH_MAX</code></td>
-        <td>Must be at most {value} characters long</td>
+        <td>Must be at most {{value}} characters long</td>
     </tr>
     <tr>
         <td><code>LENGTH_MIN</code></td>
-        <td>Must be at least {value} characters long</td>
+        <td>Must be at least {{value}} characters long</td>
     </tr>
     <tr>
         <td><code>NUMBER_MAX</code></td>
-        <td>Must be smaller than or equal to {value}</td>
+        <td>Must be smaller than or equal to {{value}}</td>
     </tr>
     <tr>
         <td><code>NUMBER_MIN</code></td>
-        <td>Must be bigger than or equal to {value}</td>
+        <td>Must be bigger than or equal to {{value}}</td>
+    </tr>
+    <tr>
+        <td><code>NUMBER_MULTIPLEOF</code></td>
+        <td>Must be multiple of {{value}}</td>
     </tr>
     <tr>
         <td><code>NUMBER_TYPE</code></td>
-        <td>Must be of type `{value}`</td>
+        <td>Must be of type `{{type}}`</td>
+    </tr>
+    <tr>
+        <td><code>PROPS_MAX</code></td>
+        <td>Must contain at most {{value}} properties</td>
+    </tr>
+    <tr>
+        <td><code>PROPS_MIN</code></td>
+        <td>Must contain at least {{value}} properties</td>
+    </tr>
+    <tr>
+        <td><code>PROP_ADDITIONAL_PROPS</code></td>
+        <td>Contains extraneous property `{{name}}`</td>
+    </tr>
+    <tr>
+        <td><code>PROP_IS_MISSING</code></td>
+        <td>Must be defined</td>
     </tr>
     <tr>
         <td><code>PROP_MISSING</code></td>
-        <td>Missing property</td>
+        <td>Must define property `{{name}}`</td>
     </tr>
     <tr>
         <td><code>PROP_MISSING_MATCH</code></td>
-        <td>Missing a property that matches `{name}`</td>
+        <td>Must contain a property that matches `{{pattern}}`</td>
     </tr>
     <tr>
         <td><code>STRING_PATTERN</code></td>
-        <td>Must match the pattern "{pattern}"</td>
+        <td>Must match the pattern `{{pattern}}`</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_ARRAY</code></td>
-        <td>Expecting an array</td>
+        <td>Must be an array</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_BOOLEAN</code></td>
-        <td>Expecting a boolean value</td>
+        <td>Must be a boolean value</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_DATETIME</code></td>
-        <td>Expecting a date/time string</td>
+        <td>Must be a date/time string</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_INTEGER</code></td>
-        <td>Expecting an integer number</td>
+        <td>Must be an integer number</td>
+    </tr>
+    <tr>
+        <td><code>TYPE_NOT_NULL</code></td>
+        <td>Must be null</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_NUMBER</code></td>
-        <td>Expecting a number</td>
+        <td>Must be a number</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_OBJECT</code></td>
-        <td>Expecting an object</td>
+        <td>Must be an object</td>
     </tr>
     <tr>
         <td><code>TYPE_NOT_STRING</code></td>
-        <td>Expecting a string</td>
+        <td>Must be a string</td>
     </tr>
 </table>
 
