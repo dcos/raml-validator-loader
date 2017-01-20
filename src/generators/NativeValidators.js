@@ -25,12 +25,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   nil(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_NULL', 'Expecting null');
+    context.useError('TYPE_NOT_NULL');
 
     return [].concat(
       'if (value !== null) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_NULL"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -45,12 +44,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   NumberType(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_NUMBER', 'Expecting a number');
+    context.useError('TYPE_NOT_NUMBER');
 
     return [].concat(
       'if (isNaN(value)) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_NUMBER"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -65,12 +63,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   IntegerType(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_INTEGER', 'Expecting an integer number');
+    context.useError('TYPE_NOT_INTEGER');
 
     return [].concat(
       'if (isNaN(value) || (value % 1 !== 0)) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_INTEGER"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -85,12 +82,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   BooleanType(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_BOOLEAN', 'Expecting a boolean value');
+    context.useError('TYPE_NOT_BOOLEAN');
 
     return [].concat(
       'if ((value !== false) && (value !== true)) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_BOOLEAN"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -105,12 +101,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   StringType(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_STRING', 'Expecting a string');
+    context.useError('TYPE_NOT_STRING');
 
     return [].concat(
       'if (typeof value != "string") {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_STRING"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -125,12 +120,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   DateTimeType(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_DATETIME', 'Expecting a date/time string');
+    context.useError('TYPE_NOT_DATETIME');
 
     return [].concat(
       'if (isNaN(new Date(value).getTime())) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_DATETIME"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -145,12 +139,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   object(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_OBJECT', 'Expecting an object');
+    context.useError('TYPE_NOT_OBJECT');
 
     return [].concat(
       'if ((typeof value != "object") || (value === null)) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_OBJECT"));',
       '} else {',
         indentFragments( fragments ),
       '}'
@@ -165,12 +158,11 @@ const NATIVE_TYPE_VALIDATORS = {
    * @return {Array} - The type validator code lines
    */
   array(fragments, context) {
-    const ERROR_MESSAGE = context.getConstantString('ERROR_MESSAGES',
-      'TYPE_NOT_ARRAY', 'Expecting an array');
+    context.useError('TYPE_NOT_ARRAY');
 
     return [].concat(
       'if (!Array.isArray(value)) {',
-        `\terrors.push(new RAMLError(path, ${ERROR_MESSAGE}));`,
+        '\terrors.push(new RAMLError(path, context, "TYPE_NOT_ARRAY"));',
       '} else {',
         indentFragments( fragments ),
       '}'

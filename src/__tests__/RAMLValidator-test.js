@@ -962,7 +962,14 @@ describe('RAMLValidator', function () {
         ].join('\n'));
         var errors = validator({});
         expect(errors).toEqual([
-          {path: ['required'], message:'Missing property'}
+          {
+            message:'Must be defined',
+            path: ['required'],
+            type: 'PROP_IS_MISSING',
+            variables: {
+              name: 'required'
+            }
+          }
         ]);
       });
 
@@ -978,7 +985,14 @@ describe('RAMLValidator', function () {
         ].join('\n'), classicConfig);
         var errors = validator({});
         expect(errors).toEqual([
-          {path: [], message:'Missing property `required`'}
+          {
+            message:'Must define property `required`',
+            path: [],
+            type: 'PROP_MISSING',
+            variables: {
+              name: 'required'
+            }
+          }
         ]);
       });
 

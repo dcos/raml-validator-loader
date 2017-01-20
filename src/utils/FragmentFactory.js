@@ -17,7 +17,7 @@ module.exports = {
 
     return [
       `if (${testExpr}) {`,
-      `\terrors.push(new RAMLError(path, ${errorConstant}, ${variablesExpr}));`,
+      `\terrors.push(new RAMLError(path, context, "${errorConstant}", ${variablesExpr}));`,
       '}'
     ];
   }
