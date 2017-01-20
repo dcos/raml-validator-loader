@@ -1,4 +1,6 @@
 ## Unversioned
+
+## v0.1.8 - 20-01-2017
 ### Added
 - Adding `Type.clone()` support for enabling runtime customizations
 - Adding `errorMessages` as a customizable property in the `.clone` function
