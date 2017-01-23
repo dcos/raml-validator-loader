@@ -8,7 +8,7 @@
     "build": "./node_modules/.bin/webpack",
     "eslint": "bash -c 'opts=$@ ; set -f; if [[ $# -lt 1 ]]; then opts=\"src/**/*.js\"; fi ; eslint --quiet ${opts}' 0"
   },
-  "author": "",
+  "author": "Ioannis Charalampidis <ioannis.charalampidis@mesosphere.com> (http://www.mesosphere.com)",
   "license": "Apache-2.0",
   "dependencies": {
     "raml-1-parser": "^1.1.6"
