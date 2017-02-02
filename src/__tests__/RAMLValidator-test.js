@@ -1024,6 +1024,42 @@ describe('RAMLValidator', function () {
         expect(errors.length).toEqual(1);
       });
 
+      it('should validate if all object items are unique', function () {
+        var errors = this.validator([
+          {
+            foo: 1,
+            bar: 2
+          },
+          {
+            foo: 2,
+            bar: 3
+          },
+          {
+            foo: 3,
+            bar: 4
+          }
+        ]);
+        expect(errors.length).toEqual(0);
+      });
+
+      it('should return error if there are duplicate objects', function () {
+        var errors = this.validator([
+          {
+            foo: 1,
+            bar: 2
+          },
+          {
+            foo: 2,
+            bar: 3
+          },
+          {
+            foo: 1,
+            bar: 2
+          }
+        ]);
+        expect(errors.length).toEqual(1);
+      });
+
     });
 
     describe('#items', function () {
