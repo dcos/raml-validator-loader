@@ -226,7 +226,7 @@ const FACET_FRAGMENT_GENERATORS = {
       'if ((function() {',
       '\tvar valuesSoFar = Object.create(null);',
       '\tfor (var i = 0; i < value.length; ++i) {',
-      '\t\tvar val = value[i];',
+      '\t\tvar val = JSON.stringify(value[i]);',
       '\t\tif (val in valuesSoFar) {',
       '\t\t\treturn true;',
       '\t\t}',
