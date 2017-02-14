@@ -11,7 +11,7 @@
   "author": "Ioannis Charalampidis <ioannis.charalampidis@mesosphere.com> (http://www.mesosphere.com)",
   "license": "Apache-2.0",
   "dependencies": {
-    "raml-1-parser": "^1.1.6"
+    "raml-1-parser": "1.1.12"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

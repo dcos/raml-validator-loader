@@ -1,4 +1,10 @@
 ## Unversioned
+### Fixed
+- Fixing `raml-1-parser` to version `1.1.12` since any newer version currently breaks the generated source
+
+## v0.1.10 - 14-02-2017
+### Fixed
+- Fixing `uniqueItems` facet validator in order to properly compare objects
 
 ## v0.1.8 - 20-01-2017
 ### Added
