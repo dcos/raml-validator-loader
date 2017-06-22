@@ -1,5 +1,7 @@
 # raml-validator-loader [![Velocity](http://jenkins.mesosphere.com/buildStatus/icon?job=raml-validator-loader-master)](http://jenkins.mesosphere.com/view/DCOS%20UI/job/raml-validator-loader-master/)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/dcos/raml-validator-loader.svg)](https://greenkeeper.io/)
+
 A webpack plugin that converts RAML rules into pure javascript-only validation routines
 
 ## Usage
