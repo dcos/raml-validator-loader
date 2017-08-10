@@ -3,7 +3,7 @@
  * validator when an error occurs.
  */
 module.exports = `
-const REPLACE_MESSAGE_TEMPLATE = /\\{\\{([^\\}]+)\\}\\}/g;
+var REPLACE_MESSAGE_TEMPLATE = /\\{\\{([^\\}]+)\\}\\}/g;
 
 function RAMLError(path, context, type, _messageVariables) {
   var messageVariables = _messageVariables || {};
