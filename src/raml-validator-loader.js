@@ -1,5 +1,5 @@
 import fs from 'fs';
-import RAML from 'raml-1-parser';
+import { loadApiSync } from 'raml-1-parser';
 
 import Generator from './Generator';
 import GeneratorContext from './GeneratorContext';
@@ -20,7 +20,7 @@ module.exports = function (source) {
   // 1) Provide a custom content for the source file
   // 2) Track dependent files in order for webpack to invalidate caches
   //
-  const raml = RAML.loadApiSync(this.resourcePath, {
+  const raml = loadApiSync(this.resourcePath, {
     fsResolver: {
       content: (path) => {
         if (path === this.resourcePath) {
